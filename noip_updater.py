@@ -32,9 +32,35 @@ class Updater:
         elif settings.get("pref_webdriver").lower() == "chrome":
             self.driver = webdriver.Chrome(executable_path=settings.get("webdriver_path"))
 
-    # Logs in to NoIP
+
+    # Logs in to NoIP main panel
     def login(self):
-        pass
+        # Launches the web browser and navigates to noip main page using the driver object that was initialised earlier and the get method
+        self.driver.get(self.url)
+        time.sleep(3)
+
+        # Finding the login button by link text name and clicking it to bring up the login menu
+        login_button = self.driver.find_element_by_link_text("Log In")
+        login_button.send_keys(Keys.RETURN)
+
+        # Finding username and password fields in the login box by name
+        login_username_field = self.driver.find_element_by_name("username")
+        login_password_field = self.driver.find_element_by_name("password")
+
+        time.sleep(1)
+
+        # Clearing text fields in case there is any text in them
+        login_username_field.clear()
+        login_password_field.clear()
+
+        # Inserting the username and password
+        login_username_field.send_keys(self.username)
+        login_password_field.send_keys(self.password)
+
+        time.sleep(1)
+
+        # Logging in by sending RETURN in the password field
+        login_password_field.send_keys(Keys.RETURN)
 
     
     # Navigates to confirmation page
