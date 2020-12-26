@@ -78,10 +78,17 @@ class Updater:
 
         # Confirming hostname
         hostname_update_button = self.driver.find_element_by_xpath("/html/body/div[1]/div/div[3]/div[4]/div/div/div/div[4]/button[1]/div")
-        self.driver.maximize_window()
+
         time.sleep(3)
+
         hostname_update_button.click()
 
+    # Closes web driver/browser and clears all cookies
+    def close(self):
+        time.sleep(3)
+
+        self.driver.delete_all_cookies()
+        self.driver.quit()
     
     # Sends email and sms notification
     def send_notification(self, email=False, sms=False, to_email="", to_number="", msg_head="", msg_body=""):
@@ -99,6 +106,9 @@ def main():
     # Iterating through the given hostnames in settings
     for hostname in settings.get("hostnames"):
         noip_updater.navigate_to_confirmation_page_and_confirm(hostname)
+    
+    # Closing web browser
+    noip_updater.close()
 
     noip_updater.send_notification(settings.get("send_email"), settings.get("send_sms"),
     settings.get("notification_receiver_email"), settings.get("notification_receiver_number"),
