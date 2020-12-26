@@ -10,6 +10,8 @@
         
         - twilio_auth_token_env_var_id - this key must have the enviroumental variable name that was used to store the twilio account authentication token
           (leave empty if sms won't be used)
+        - pref_webdriver - Firefox or Chrome to be the value of this key
+        - webdriver_path - system path to the executable web driver that is compatible with your system
         - send_email - must be True if the preferred notification method is via emails
         - send_sms - must be True if the preferred notification method is via sms
         - notification_receiver_number - this key must have the user's number as a value (if sms is being used)
@@ -25,6 +27,8 @@ settings = {
     "noip_password_env_var_id":"",
     "twilio_account_sid_env_var_id":"",
     "twilio_auth_token_env_var_id":"",
+    "pref_webdriver":"",
+    "webdriver_path":"",
     "send_email":False,
     "send_sms":False,
     "notification_receiver_number":"",
