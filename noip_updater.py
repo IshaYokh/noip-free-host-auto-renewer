@@ -27,11 +27,10 @@ class Updater:
         
         # Checking if firefox or chrome has been chosen in the settings and running selected web driver
         if settings.get("pref_webdriver").lower() == "firefox":
-            self.driver = webdriver.Firefox(executable_path=settings.get("webdriver_path"))
+            self.driver = webdriver.Firefox()
         
         elif settings.get("pref_webdriver").lower() == "chrome":
-            self.driver = webdriver.Chrome(executable_path=settings.get("webdriver_path"))
-
+            self.driver = webdriver.Chrome()
 
     # Logs in to NoIP main panel
     def login(self):
@@ -61,21 +60,27 @@ class Updater:
 
         # Logging in by sending RETURN in the password field
         login_password_field.send_keys(Keys.RETURN)
-
     
-    # Navigates to confirmation page
-    def navigate_to_confirmation_page(self):
-        pass
+    # Navigates to confirmation page and confirms hostname
+    def navigate_to_confirmation_page_and_confirm(self, hostname):
+        time.sleep(5)
 
+        # Navigating to dynamic dns page
+        self.driver.get("https://my.noip.com/#!/dynamic-dns")
 
-    # Confirms host name
-    def confirm_hostname(self):
-        pass
+        time.sleep(10)
 
-    
-    # Gets host name from the NoIP panel
-    def get_hostname(self):
-        return ""
+        # Clicking on the selected hostname/hostnames to bring up the hostname update menu
+        hostname_link = self.driver.find_element_by_link_text(hostname)
+        hostname_link.click()
+
+        time.sleep(3)
+
+        # Confirming hostname
+        hostname_update_button = self.driver.find_element_by_xpath("/html/body/div[1]/div/div[3]/div[4]/div/div/div/div[4]/button[1]/div")
+        self.driver.maximize_window()
+        time.sleep(3)
+        hostname_update_button.click()
 
     
     # Sends email and sms notification
@@ -90,9 +95,11 @@ def main():
     noip_updater = Updater("https://www.noip.com/", noip_username, noip_password, twilio_sid, twilio_auth_token)
 
     noip_updater.login()
-    noip_updater.navigate_to_confirmation_page()
-    noip_updater.confirm_hostname()
-    hostname = noip_updater.get_hostname()
+
+    # Iterating through the given hostnames in settings
+    for hostname in settings.get("hostnames"):
+        noip_updater.navigate_to_confirmation_page_and_confirm(hostname)
+
     noip_updater.send_notification(settings.get("send_email"), settings.get("send_sms"),
     settings.get("notification_receiver_email"), settings.get("notification_receiver_number"),
     settings.get("message_head"), settings.get("message_body")

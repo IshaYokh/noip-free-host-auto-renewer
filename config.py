@@ -5,6 +5,10 @@
     Explanation of what each key is for:
         - noip_username_env_var_id - this key must have the enviroumental variable name that was used to store the NoIP account username as a value
         - noip_password_env_var_id - this key must have the enviroumental variable name that was used to store the NoIP account password as a value
+        
+        - hostnames - This key holds a list of hostnames that need to be confirmed on NoIP, the list should look like the following:
+          ["example1.com", "example2.com", "example3.com"]
+        
         - twilio_account_sid_env_var_id - this key must have the enviroumental variable name that was used to store the twilio account SID
           (leave empty if sms won't be used)
         
@@ -21,10 +25,10 @@
         - message_body - SMS or Email message body when notification is sent
 """
 
-
 settings = {
     "noip_username_env_var_id":"",
     "noip_password_env_var_id":"",
+    "hostnames":[],
     "twilio_account_sid_env_var_id":"",
     "twilio_auth_token_env_var_id":"",
     "pref_webdriver":"",
