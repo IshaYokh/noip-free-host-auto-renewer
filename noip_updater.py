@@ -55,6 +55,10 @@ class Updater:
 
                 sys.exit()
 
+        else:
+            print("[X] Given web browser name in settings is not recognised must be either firefox or chrome")
+            sys.exit()
+
     # Logs in to NoIP main panel
     def login(self):
         print("[*] Logging in to NoIP panel")
@@ -88,7 +92,7 @@ class Updater:
     
     # Navigates to confirmation page and confirms hostname
     def navigate_to_confirmation_page_and_confirm(self, hostname):
-        print("[*] Updating " + hostnames)
+        print("[*] Updating " + hostname)
 
         time.sleep(5)
 
@@ -97,8 +101,16 @@ class Updater:
 
         time.sleep(10)
 
-        # Clicking on the selected hostname/hostnames to bring up the hostname update menu
-        hostname_link = self.driver.find_element_by_link_text(hostname)
+        """
+            Clicking on the selected hostname/hostnames to bring up the hostname update menu 
+            and validating if given hostname in settings exists on the panel
+        """
+        try:
+            hostname_link = self.driver.find_element_by_link_text(hostname)
+        except NoSuchElementException:
+            self.failed_hostnames.append(hostname)
+            return self.failed_hostnames
+
         hostname_link.click()
 
         time.sleep(3)
