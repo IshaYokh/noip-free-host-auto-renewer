@@ -15,22 +15,41 @@ from email.message import EmailMessage
 from twilio.rest import Client
 from config import settings
 import os
+import socket
 
 # Updater class that contains the methods to run the web driver and handle website interaction
 class Updater:
-    def __init__(self, url, username, password, twilio_account_sid="", twilio_auth_token=""):
+    def __init__(self, url, username, password, twilio_account_sid="", twilio_auth_token="", gmail_username="", gmail_password=""):
         self.url = url
         self.username = username
         self.password = password
         self.twilio_account_sid = twilio_account_sid
         self.twilio_auth_token = twilio_auth_token
+        self.gmail_username = gmail_username
+        self.gmail_password = gmail_password
         
         # Checking if firefox or chrome has been chosen in the settings and running selected web driver
         if settings.get("pref_webdriver").lower() == "firefox":
-            self.driver = webdriver.Firefox()
+            try:
+                self.driver = webdriver.Firefox()
+            except:
+                print("""[X] Something went wrong with initialising the firefox web driver,
+                        make sure the executable web driver for firefox has been added to
+                        PATH in your system
+                """)
+                
+                sys.exit()
         
         elif settings.get("pref_webdriver").lower() == "chrome":
-            self.driver = webdriver.Chrome()
+            try:
+                self.driver = webdriver.Chrome()
+            except:
+                print("""[X] Something went wrong with initialising the chrome web driver,
+                        make sure the executable web driver for chrome has been added to
+                        PATH in your system
+                """)
+
+                sys.exit()
 
     # Logs in to NoIP main panel
     def login(self):
@@ -91,15 +110,47 @@ class Updater:
         self.driver.quit()
     
     # Sends email and sms notification
-    def send_notification(self, email=False, sms=False, to_email="", to_number="", msg_head="", msg_body=""):
-        pass
+    def send_notification(self, from_email="", to_email="", from_number="", to_number="", msg_head="", msg_body=""):
+        # Validating if the user has chosen email option and sending email using EmailMessage() and smtplib
+        if settings.get("send_email"):
+            msg = EmailMessage()
+            msg["Subject"] = msg_head
+            msg["From"] = from_email
+            msg["To"] = to_email
+            msg.set_content(msg_body)
+
+            try:
+                with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+                    try:
+                        smtp.login(self.gmail_username, self.gmail_password)
+                        smtp.send_message(msg)
+                    except smtplib.SMTPAuthenticationError:
+                        print( "[X] Error sending email - check receiver email or sender email and password\n\t \
+                                [!] Make sure less secure apps is enabled on the sender email\n\t \
+                                [!] Make sure you haven't been blocked")
+            
+            except socket.gaierror:
+                print("[X] Error sending email - check your internet connection")
+
+        # Validating if the user has chosen sms option and sending sms using twilio API
+        if settings.get("send_sms"):
+            twilio_client = Client(self.twilio_account_sid, self.twilio_auth_token)
+            twilio_client.messages \
+                .create(
+                    body = msg_body,
+                    from_= from_number,
+                    to = to_number
+                )
 
 # Contains the main logic of the program and creates an instance object of the Updater class and uses its methods
 def main():
-    noip_username, noip_password, twilio_sid, twilio_auth_token = read_creds()
+    # Validating settings before creating an Updater object
+    validate_settings()
+
+    noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password = read_creds()
 
     # Creating noip_updater object
-    noip_updater = Updater("https://www.noip.com/", noip_username, noip_password, twilio_sid, twilio_auth_token)
+    noip_updater = Updater("https://www.noip.com/", noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password)
 
     noip_updater.login()
 
@@ -110,8 +161,9 @@ def main():
     # Closing web browser
     noip_updater.close()
 
-    noip_updater.send_notification(settings.get("send_email"), settings.get("send_sms"),
-    settings.get("notification_receiver_email"), settings.get("notification_receiver_number"),
+    noip_updater.send_notification( settings.get("notification_sender_email"), 
+    settings.get("notification_receiver_email"), settings.get("notification_sender_number"),
+    settings.get("notification_receiver_number"),
     settings.get("message_head"), settings.get("message_body")
     )
 
@@ -122,9 +174,28 @@ def read_creds():
     noip_password = os.environ[settings.get("noip_password_env_var_id")]
     twilio_sid = os.environ[settings.get("twilio_account_sid_env_var_id")]
     twilio_auth_token = os.environ[settings.get("twilio_auth_token_env_var_id")]
+    gmail_username = os.environ[settings.get("gmail_username_env_var_id")]
+    gmail_password = os.environ[settings.get("gmail_password_env_var_id")]
 
-    return noip_username, noip_password, twilio_sid, twilio_auth_token
+    return noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password
 
+
+# Validates values in the settings object and displays message/errors accordingly
+def validate_settings():
+    if not settings.get("noip_username_env_var_id") and not settings.get("noip_password_env_var_id"):
+        print("[X] NoIP username or password could not be found using the environmental variables given in settings")
+        sys.exit()
+    
+    if not settings.get("hostnames"):
+        print("[X] No domain names found in settings, you must add at least one")
+        sys.exit()
+
+    if settings.get("pref_webdriver").lower() != "firefox" and settings.get("pref_webdriver").lower() != "chrome":
+        print("[X] The preferred web browser specified in settings was not recognised, must be firefox or chrome")
+        sys.exit()
+
+    if not settings.get("send_email") and not settings.get("send_sms"):
+        print("[X] Both values for twilio or/and gmail options were not set to true in settings, at least one must be selected, email/sms")
 
 if __name__ == "__main__":
     try:

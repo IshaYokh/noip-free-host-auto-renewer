@@ -14,10 +14,13 @@
         
         - twilio_auth_token_env_var_id - this key must have the enviroumental variable name that was used to store the twilio account authentication token
           (leave empty if sms won't be used)
+        - gmail_username_env_var_id - this key must have the enviroumental variable name that was used to store the gmail username
+        - gmail_password_env_var_id - this key must have the enviroumental variable name that was used to store the gmail password
         - pref_webdriver - Firefox or Chrome to be the value of this key
-        - webdriver_path - system path to the executable web driver that is compatible with your system
         - send_email - must be True if the preferred notification method is via emails
         - send_sms - must be True if the preferred notification method is via sms
+        - notification_sender_number - this key must have the sender's number as a value (if sms is being used)
+        - notification_sender_email - this key must have the sender's email as a value (if email is being used)
         - notification_receiver_number - this key must have the user's number as a value (if sms is being used)
         - notification_receiver_email - this key must have the user's email as a value (if email is being used)
         - update_schedule - This key must hold how frequent the script should run in Days (must be in Days) Default is every 30 days
@@ -31,10 +34,13 @@ settings = {
     "hostnames":[],
     "twilio_account_sid_env_var_id":"",
     "twilio_auth_token_env_var_id":"",
+    "gmail_username_env_var_id":"",
+    "gmail_password_env_var_id":"",
     "pref_webdriver":"",
-    "webdriver_path":"",
     "send_email":False,
     "send_sms":False,
+    "notification_sender_number":"",
+    "notification_sender_email":"",
     "notification_receiver_number":"",
     "notification_receiver_email":"",
     "update_schedule":"30",
