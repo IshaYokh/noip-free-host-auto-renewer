@@ -8,6 +8,7 @@
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 import time
 import sys
 import smtplib
@@ -27,6 +28,7 @@ class Updater:
         self.twilio_auth_token = twilio_auth_token
         self.gmail_username = gmail_username
         self.gmail_password = gmail_password
+        self.failed_hostnames = []
         
         # Checking if firefox or chrome has been chosen in the settings and running selected web driver
         if settings.get("pref_webdriver").lower() == "firefox":
@@ -102,6 +104,23 @@ class Updater:
 
         hostname_update_button.click()
 
+        # Validating if hostname wasn't updated sucessfully and adding the hostname to failed hostnames list if it failed
+        if not self.validate_host_confirmation(hostname):
+            self.failed_hostnames.append(hostname)
+
+        return self.failed_hostnames
+
+    # Validates if the message of a sucessful host confirmation popped up
+    def validate_host_confirmation(self, hostname):
+        time.sleep(2)
+
+        try:
+            update_feedback_msg = self.driver.find_element_by_class_name("growl-message")
+            return True
+
+        except NoSuchElementException:
+            return False
+
     # Closes web driver/browser and clears all cookies
     def close(self):
         time.sleep(3)
@@ -144,6 +163,11 @@ class Updater:
 
 # Contains the main logic of the program and creates an instance object of the Updater class and uses its methods
 def main():
+    # Failed hostnames list for hostnames that were not updated
+    failed_hostnames = []
+    # Email message variable that will be given the message accordingly
+    email_message = "The following hostnames have been sucessfuly updated:"
+
     # Validating settings before creating an Updater object
     validate_settings()
 
@@ -156,16 +180,29 @@ def main():
 
     # Iterating through the given hostnames in settings
     for hostname in settings.get("hostnames"):
-        noip_updater.navigate_to_confirmation_page_and_confirm(hostname)
-    
-    # Closing web browser
-    noip_updater.close()
+        failed_hostnames = noip_updater.navigate_to_confirmation_page_and_confirm(hostname)
 
+        # Constructing email message that will be sent to the user based on sucessful/failed hostname updates
+        if failed_hostnames:
+            counter = 1
+            email_message = "The following hostnames were not updated during the NoIP hostnames update:"
+            
+            for hostname in failed_hostnames:
+                email_message += "\n\t{counter}. {hostname}".format(counter=counter, hostname= hostname)
+                counter += 1
+
+        else:
+            email_message += "\n\t {hostname}".format(hostname=hostname)
+    
+    # Sending notification
     noip_updater.send_notification( settings.get("notification_sender_email"), 
     settings.get("notification_receiver_email"), settings.get("notification_sender_number"),
     settings.get("notification_receiver_number"),
-    settings.get("message_head"), settings.get("message_body")
+    settings.get("message_head"), email_message
     )
+        
+    # Closing web browser
+    noip_updater.close()
 
 # Uses the values from keys that are stored in the settings dict object to read environmental variables
 def read_creds():
