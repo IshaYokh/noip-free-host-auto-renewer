@@ -33,6 +33,7 @@ class Updater:
         # Checking if firefox or chrome has been chosen in the settings and running selected web driver
         if settings.get("pref_webdriver").lower() == "firefox":
             try:
+                print("[*] Launching Firefox")
                 self.driver = webdriver.Firefox()
             except:
                 print("""[X] Something went wrong with initialising the firefox web driver,
@@ -44,6 +45,7 @@ class Updater:
         
         elif settings.get("pref_webdriver").lower() == "chrome":
             try:
+                print("[*] Launching Chrome")
                 self.driver = webdriver.Chrome()
             except:
                 print("""[X] Something went wrong with initialising the chrome web driver,
@@ -55,6 +57,8 @@ class Updater:
 
     # Logs in to NoIP main panel
     def login(self):
+        print("[*] Logging in to NoIP panel")
+
         # Launches the web browser and navigates to noip main page using the driver object that was initialised earlier and the get method
         self.driver.get(self.url)
         time.sleep(3)
@@ -84,6 +88,8 @@ class Updater:
     
     # Navigates to confirmation page and confirms hostname
     def navigate_to_confirmation_page_and_confirm(self, hostname):
+        print("[*] Updating " + hostnames)
+
         time.sleep(5)
 
         # Navigating to dynamic dns page
@@ -107,6 +113,9 @@ class Updater:
         # Validating if hostname wasn't updated sucessfully and adding the hostname to failed hostnames list if it failed
         if not self.validate_host_confirmation(hostname):
             self.failed_hostnames.append(hostname)
+            print("[*] {hostname} wasn't updated sucessfully".format(hostname=hostname))
+        else:
+            print("[*] {hostname} updated sucessfully".fomrat(hostname=hostname))
 
         return self.failed_hostnames
 
@@ -123,6 +132,8 @@ class Updater:
 
     # Closes web driver/browser and clears all cookies
     def close(self):
+        print("[*] Closing web driver")
+
         time.sleep(3)
 
         self.driver.delete_all_cookies()
@@ -130,6 +141,8 @@ class Updater:
     
     # Sends email and sms notification
     def send_notification(self, from_email="", to_email="", from_number="", to_number="", msg_head="", msg_body=""):
+        print("[*] Sending update notification")
+
         # Validating if the user has chosen email option and sending email using EmailMessage() and smtplib
         if settings.get("send_email"):
             msg = EmailMessage()
@@ -207,12 +220,41 @@ def main():
 # Uses the values from keys that are stored in the settings dict object to read environmental variables
 def read_creds():
     # Reading environmental variables that are needed for authentication
-    noip_username = os.environ[settings.get("noip_username_env_var_id")]
-    noip_password = os.environ[settings.get("noip_password_env_var_id")]
-    twilio_sid = os.environ[settings.get("twilio_account_sid_env_var_id")]
-    twilio_auth_token = os.environ[settings.get("twilio_auth_token_env_var_id")]
-    gmail_username = os.environ[settings.get("gmail_username_env_var_id")]
-    gmail_password = os.environ[settings.get("gmail_password_env_var_id")]
+    try:
+        noip_username = os.environ[settings.get("noip_username_env_var_id")]
+    except KeyError:
+        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("noip_username_env_var_id")))
+        sys.exit()
+    
+    try:
+        noip_password = os.environ[settings.get("noip_password_env_var_id")]
+    except KeyError:
+        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("noip_password_env_var_id")))
+        sys.exit()
+
+    try:
+        twilio_sid = os.environ[settings.get("twilio_account_sid_env_var_id")]
+    except KeyError:
+        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("twilio_account_sid_env_var_id")))
+        sys.exit()
+    
+    try:
+        twilio_auth_token = os.environ[settings.get("twilio_auth_token_env_var_id")]
+    except KeyError:
+        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("twilio_auth_token_env_var_id")))
+        sys.exit()
+
+    try:
+        gmail_username = os.environ[settings.get("gmail_username_env_var_id")]
+    except KeyError:
+        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("gmail_username_env_var_id")))
+        sys.exit()
+
+    try:
+        gmail_password = os.environ[settings.get("gmail_password_env_var_id")]
+    except KeyError:
+        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("gmail_password_env_var_id")))
+        sys.exit()
 
     return noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password
 
