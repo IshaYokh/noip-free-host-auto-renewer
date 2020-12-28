@@ -9,6 +9,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import WebDriverException
 import time
 import sys
 import smtplib
@@ -127,7 +128,7 @@ class Updater:
             self.failed_hostnames.append(hostname)
             print("[*] {hostname} wasn't updated sucessfully".format(hostname=hostname))
         else:
-            print("[*] {hostname} updated sucessfully".fomrat(hostname=hostname))
+            print("[*] {hostname} updated sucessfully".format(hostname=hostname))
 
         return self.failed_hostnames
 
@@ -201,7 +202,11 @@ def main():
     # Creating noip_updater object
     noip_updater = Updater("https://www.noip.com/", noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password)
 
-    noip_updater.login()
+    try:
+        noip_updater.login()
+    except WebDriverException:
+        print("[X] Unable to connect to NoIP, check your internet connection")
+        sys.exit()
 
     # Iterating through the given hostnames in settings
     for hostname in settings.get("hostnames"):
@@ -219,12 +224,14 @@ def main():
         else:
             email_message += "\n\t {hostname}".format(hostname=hostname)
     
-    # Sending notification
-    noip_updater.send_notification( settings.get("notification_sender_email"), 
-    settings.get("notification_receiver_email"), settings.get("notification_sender_number"),
-    settings.get("notification_receiver_number"),
-    settings.get("message_head"), email_message
-    )
+    # Validating preferred notification method from settings
+    if settings.get("send_sms") or settings.get("send_email"):
+        # Sending notification
+        noip_updater.send_notification( settings.get("notification_sender_email"), 
+        settings.get("notification_receiver_email"), settings.get("notification_sender_number"),
+        settings.get("notification_receiver_number"),
+        settings.get("message_head"), email_message
+        )
         
     # Closing web browser
     noip_updater.close()
@@ -284,9 +291,6 @@ def validate_settings():
     if settings.get("pref_webdriver").lower() != "firefox" and settings.get("pref_webdriver").lower() != "chrome":
         print("[X] The preferred web browser specified in settings was not recognised, must be firefox or chrome")
         sys.exit()
-
-    if not settings.get("send_email") and not settings.get("send_sms"):
-        print("[X] Both values for twilio or/and gmail options were not set to true in settings, at least one must be selected, email/sms")
 
 if __name__ == "__main__":
     try:
