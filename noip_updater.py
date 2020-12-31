@@ -29,6 +29,11 @@ class Updater:
         self.twilio_auth_token = twilio_auth_token
         self.gmail_username = gmail_username
         self.gmail_password = gmail_password
+
+        """
+            Empty failed_hostnames list to be later used to store hostnames that were not updated
+            because of some issues
+        """
         self.failed_hostnames = []
         
         # Checking if firefox or chrome has been chosen in the settings and running selected web driver
@@ -69,7 +74,7 @@ class Updater:
         time.sleep(3)
 
         # Finding the login button by link text name and clicking it to bring up the login menu
-        login_button = self.driver.find_element_by_link_text("Log In")
+        login_button = self.driver.find_element_by_link_text("Sign In")
         login_button.send_keys(Keys.RETURN)
 
         # Finding username and password fields in the login box by name
@@ -91,8 +96,8 @@ class Updater:
         # Logging in by sending RETURN in the password field
         login_password_field.send_keys(Keys.RETURN)
     
-    # Navigates to confirmation page and confirms hostname
-    def navigate_to_confirmation_page_and_confirm(self, hostname):
+    # Navigates to confirmation page
+    def navigate_to_confirmation_page(self, hostname, hostnames_counter):
         print("[*] Updating " + hostname)
 
         time.sleep(5)
@@ -103,8 +108,8 @@ class Updater:
         time.sleep(10)
 
         """
-            Clicking on the selected hostname/hostnames to bring up the hostname update menu 
-            and validating if given hostname in settings exists on the panel
+            Looking for the given hostname in settings on the web page and 
+            validating if it exists
         """
         try:
             hostname_link = self.driver.find_element_by_link_text(hostname)
@@ -112,36 +117,12 @@ class Updater:
             self.failed_hostnames.append(hostname)
             return self.failed_hostnames
 
-        hostname_link.click()
+        self.confirm_hostname(hostname, hostnames_counter)
 
-        time.sleep(3)
-
-        # Confirming hostname
-        hostname_update_button = self.driver.find_element_by_xpath("/html/body/div[1]/div/div[3]/div[4]/div/div/div/div[4]/button[1]/div")
-
-        time.sleep(3)
-
-        hostname_update_button.click()
-
-        # Validating if hostname wasn't updated sucessfully and adding the hostname to failed hostnames list if it failed
-        if not self.validate_host_confirmation(hostname):
-            self.failed_hostnames.append(hostname)
-            print("[*] {hostname} wasn't updated sucessfully".format(hostname=hostname))
-        else:
-            print("[*] {hostname} updated sucessfully".format(hostname=hostname))
-
-        return self.failed_hostnames
-
-    # Validates if the message of a sucessful host confirmation popped up
-    def validate_host_confirmation(self, hostname):
-        time.sleep(2)
-
-        try:
-            update_feedback_msg = self.driver.find_element_by_class_name("growl-message")
-            return True
-
-        except NoSuchElementException:
-            return False
+    # Confirms each hostname by clicking on confirm button
+    def confirm_hostname(self, hostname, hostnames_counter):
+        confirm_button = self.driver.find_element_by_xpath("//*[@id=\"host-panel\"]/table/tbody/tr[{tr_num}]/td[5]/button".format(tr_num=hostnames_counter))
+        confirm_button.click()
 
     # Closes web driver/browser and clears all cookies
     def close(self):
@@ -209,8 +190,9 @@ def main():
         sys.exit()
 
     # Iterating through the given hostnames in settings
+    hostnames_counter = 1
     for hostname in settings.get("hostnames"):
-        failed_hostnames = noip_updater.navigate_to_confirmation_page_and_confirm(hostname)
+        failed_hostnames = noip_updater.navigate_to_confirmation_page(hostname, hostnames_counter)
 
         # Constructing email message that will be sent to the user based on sucessful/failed hostname updates
         if failed_hostnames:
@@ -223,6 +205,8 @@ def main():
 
         else:
             email_message += "\n\t {hostname}".format(hostname=hostname)
+        
+        hostnames_counter += 1
     
     # Validating preferred notification method from settings
     if settings.get("send_sms") or settings.get("send_email"):
@@ -255,25 +239,25 @@ def read_creds():
         twilio_sid = os.environ[settings.get("twilio_account_sid_env_var_id")]
     except KeyError:
         print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("twilio_account_sid_env_var_id")))
-        sys.exit()
+        twilio_sid = ""
     
     try:
         twilio_auth_token = os.environ[settings.get("twilio_auth_token_env_var_id")]
     except KeyError:
         print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("twilio_auth_token_env_var_id")))
-        sys.exit()
+        twilio_auth_token = ""
 
     try:
         gmail_username = os.environ[settings.get("gmail_username_env_var_id")]
     except KeyError:
         print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("gmail_username_env_var_id")))
-        sys.exit()
+        gmail_username = ""
 
     try:
         gmail_password = os.environ[settings.get("gmail_password_env_var_id")]
     except KeyError:
         print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("gmail_password_env_var_id")))
-        sys.exit()
+        gmail_password = ""
 
     return noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password
 
