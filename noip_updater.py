@@ -226,37 +226,37 @@ def read_creds():
     try:
         noip_username = os.environ[settings.get("noip_username_env_var_id")]
     except KeyError:
-        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("noip_username_env_var_id")))
+        print("[X] Unable to find environmental variable \"{env_var}\" for NoIP username".format(env_var=settings.get("noip_username_env_var_id")))
         sys.exit()
     
     try:
         noip_password = os.environ[settings.get("noip_password_env_var_id")]
     except KeyError:
-        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("noip_password_env_var_id")))
+        print("[X] Unable to find environmental variable \"{env_var}\" NoIP password".format(env_var=settings.get("noip_password_env_var_id")))
         sys.exit()
 
     try:
         twilio_sid = os.environ[settings.get("twilio_account_sid_env_var_id")]
     except KeyError:
-        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("twilio_account_sid_env_var_id")))
+        print("[X] Unable to find environmental variable \"{env_var}\" for twilio account SID".format(env_var=settings.get("twilio_account_sid_env_var_id")))
         twilio_sid = ""
     
     try:
         twilio_auth_token = os.environ[settings.get("twilio_auth_token_env_var_id")]
     except KeyError:
-        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("twilio_auth_token_env_var_id")))
+        print("[X] Unable to find environmental variable \"{env_var}\" for twilio authentication token".format(env_var=settings.get("twilio_auth_token_env_var_id")))
         twilio_auth_token = ""
 
     try:
         gmail_username = os.environ[settings.get("gmail_username_env_var_id")]
     except KeyError:
-        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("gmail_username_env_var_id")))
+        print("[X] Unable to find environmental variable \"{env_var}\" for gmail username".format(env_var=settings.get("gmail_username_env_var_id")))
         gmail_username = ""
 
     try:
         gmail_password = os.environ[settings.get("gmail_password_env_var_id")]
     except KeyError:
-        print("[X] Unable to find environmental \"{env_var}\"".format(env_var=settings.get("gmail_password_env_var_id")))
+        print("[X] Unable to find environmental variable \"{env_var}\" for gmail password".format(env_var=settings.get("gmail_password_env_var_id")))
         gmail_password = ""
 
     return noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password
@@ -275,6 +275,38 @@ def validate_settings():
     if settings.get("pref_webdriver").lower() != "firefox" and settings.get("pref_webdriver").lower() != "chrome":
         print("[X] The preferred web browser specified in settings was not recognised, must be firefox or chrome")
         sys.exit()
+
+    if settings.get("send_email") and not settings.get("gmail_username_env_var_id") and not settings.get("gmail_password_env_var_id") or not settings.get("send_email") and \
+    settings.get("gmail_username_env_var_id") and settings.get("gmail_password_env_var_id"):
+        print(""" [X] send_email function is enabled in settings but no credentials for gmail were provided, or it has been disabled and credentials are provided, 
+        set send_email to false if there are no gmail credentials, remove the credentials if it is already on false, or set it to true and provide email credentials to use the email function """)
+        sys.exit()
+    
+    if settings.get("send_sms") and not settings.get("twilio_account_sid_env_var_id") and not settings.get("twilio_auth_token_env_var_id") or not settings.get("send_sms") and \
+    settings.get("twilio_account_sid_env_var_id") and settings.get("twilio_auth_token_env_var_id"):
+        print(""" [X] send_sms function is enabled in settings but no credentials for twilio were provided, or it has been disabled and credentials are provided,
+        set send_sms to false if there are no twilio credentials, remove the credentials if it is already on false, or set it to true and provide twilio credentials to use the sms function""")
+        sys.exit()
+
+    if settings.get("send_email") and settings.get("gmail_username_env_var_id") and not settings.get("gmail_password_env_var_id") or settings.get("send_email") and settings.get("gmail_password_env_var_id") and \
+    not settings.get("gmail_username_env_var_id"):
+        print("[X] Gmail username has been provided but password is missing or vice versa")
+        sys.exit()
+
+    if settings.get("send_sms") and settings.get("twilio_account_sid_env_var_id") and not settings.get("twilio_auth_token_env_var_id") or settings.get("send_sms") and settings.get("twilio_auth_token_env_var_id") and \
+    not settings.get("twilio_account_sid_env_var_id"):
+        print("[X] Twilio account SID has been provided but authentication token is missing or vice versa")
+        sys.exit()
+
+    if settings.get("send_email"):
+        if not settings.get("notification_sender_email") or not settings.get("notification_receiver_email"):
+            print("[X] send_email function has been enabled but email addresses are missing")
+            sys.exit()
+
+    if settings.get("send_sms"):
+        if not settings.get("notification_sender_number") or not settings.get("notification_receiver_number"):
+            print("[X] send_sms function has been enabled but phone numbers are missing")
+            sys.exit()
 
 if __name__ == "__main__":
     try:
