@@ -1,4 +1,5 @@
 # Author: @IshaYokh
+# Code repo: https://github.com/IshaYokh/noip-free-host-auto-renewer
 
 """
     This is the main module that contains the main code to run the web driver,
@@ -220,6 +221,16 @@ def main():
     # Closing web browser
     noip_updater.close()
 
+    # Checking schedule
+    check_schedule()
+
+# Runs checks if user has set a time interval in settings for the script to automatically run again and sleeps until next run time
+def check_schedule():
+    if settings.get("update_schedule") > 0:
+        while True:
+            time.sleep(int(settings.get("update_schedule")))
+            main()
+
 # Uses the values from keys that are stored in the settings dict object to read environmental variables
 def read_creds():
     # Reading environmental variables that are needed for authentication
@@ -316,3 +327,4 @@ if __name__ == "__main__":
 
 
 # Author: @IshaYokh
+# Code repo: https://github.com/IshaYokh/noip-free-host-auto-renewer
