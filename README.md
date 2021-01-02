@@ -61,20 +61,20 @@ The script's functionality will completely depend on the correct values defined 
 After fully configuring and providing all required values in settings, the script can be simply run with the below commands in the terminal or CMD:
 
 - Linux/Unix:
-    - python3 noip_updater
+    - python3 noip_updater.py
 
 - Windows:
-    - python noip_updater
+    - python noip_updater.py
 
-### Running in headless mode:
+### Running with headless mode:
 
-To run the script in headless mode, simply add --headless argument from the terminal or CMD:
+To run the script with headless mode, simply add --headless argument from the terminal or CMD:
 
 - Linux/Unix:
-    - python3 noip_updater --headless
+    - python3 noip_updater.py --headless
 
 - Windows:
-    - python noip_updater --headless
+    - python noip_updater.py --headless
 
 ## LICENCE:
 ***NOT FOR COMMERCIAL USE If you intened to use any of my code for commercial use please contact me and get my permission. If you intend to make money using any of my code please ask my permission***
