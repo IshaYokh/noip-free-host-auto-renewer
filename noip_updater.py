@@ -45,7 +45,7 @@ class Updater:
             try:
                 # Checking if headless mode has been selected before initialising firefox web driver
                 if arg:
-                    print("[*] Launching Firefox in headless mode")
+                    print("[*] Launching Firefox with headless mode")
 
                     # Setting web driver to run in headless mode using firefox Options() and passing it as an argument when initialising firefox web driver
                     firefox_opts = firefox_options()
@@ -68,7 +68,7 @@ class Updater:
             try:
                 # Checking if headless mode has been selected before initialising chrome web driver
                 if arg:
-                    print("[*] Launching Chrome in headless mode")
+                    print("[*] Launching Chrome with headless mode")
 
                     # Setting web driver to run in headless mode using chrome Options() and passing it as an argument when initialising chrome web driver
                     chrome_opts = chrome_options()
@@ -95,7 +95,7 @@ class Updater:
     def login(self):
         print("[*] Logging in to NoIP panel")
 
-        # Launches the web browser and navigates to noip main page using the driver object that was initialised earlier and the get method
+        # Launching the web browser and navigating to noip main page using the driver object that was initialised earlier and the get method
         self.driver.get(self.url)
         time.sleep(3)
 
@@ -213,6 +213,7 @@ def main():
     # Creating noip_updater object
     noip_updater = Updater("https://www.noip.com/", noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password, args.headless)
 
+    # Logging in
     try:
         noip_updater.login()
     except WebDriverException:
@@ -224,7 +225,7 @@ def main():
     for hostname in settings.get("hostnames"):
         failed_hostnames = noip_updater.navigate_to_confirmation_page(hostname, hostnames_counter)
 
-        # Constructing email message that will be sent to the user based on sucessful/failed hostname updates
+        # Constructing email message that will be sent to the user based on successful/failed hostname updates
         if failed_hostnames:
             counter = 1
             email_message = "The following hostnames were not updated during the NoIP hostnames update:"
@@ -261,7 +262,7 @@ def take_args():
 
     return args
 
-# Runs checks if user has set a time interval in settings for the script to automatically run again and sleeps until next run time
+# Runs checks if user has set a time in settings for the script to automatically run again, then sleeps until next run
 def check_schedule():
     try:
         if int(settings.get("update_schedule")) > 0:
@@ -315,7 +316,7 @@ def read_creds():
     return noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password
 
 
-# Validates values in the settings object and displays message/errors accordingly
+# Validates values in the settings object and displays messages/errors accordingly
 def validate_settings():
     if not settings.get("noip_username_env_var_id") and not settings.get("noip_password_env_var_id"):
         print("[X] NoIP username or password could not be found using the environmental variables given in settings")
