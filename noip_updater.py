@@ -11,6 +11,9 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.chrome.options import Options as chrome_options
+from selenium.webdriver.firefox.options import Options as firefox_options
+import argparse
 import time
 import sys
 import smtplib
@@ -22,7 +25,7 @@ import socket
 
 # Updater class that contains the methods to run the web driver and handle website interaction
 class Updater:
-    def __init__(self, url, username, password, twilio_account_sid="", twilio_auth_token="", gmail_username="", gmail_password=""):
+    def __init__(self, url, username, password, twilio_account_sid="", twilio_auth_token="", gmail_username="", gmail_password="", arg=None):
         self.url = url
         self.username = username
         self.password = password
@@ -40,8 +43,19 @@ class Updater:
         # Checking if firefox or chrome has been chosen in the settings and running selected web driver
         if settings.get("pref_webdriver").lower() == "firefox":
             try:
-                print("[*] Launching Firefox")
-                self.driver = webdriver.Firefox()
+                # Checking if headless mode has been selected before initialising firefox web driver
+                if arg:
+                    print("[*] Launching Firefox in headless mode")
+
+                    # Setting web driver to run in headless mode using firefox Options() and passing it as an argument when initialising firefox web driver
+                    firefox_opts = firefox_options()
+                    firefox_opts.add_argument("--headless")
+
+                    self.driver = webdriver.Firefox(options=firefox_opts)
+                else:
+                    print("[*] Launching Firefox")
+                    self.driver = webdriver.Firefox()
+
             except:
                 print("""[X] Something went wrong with initialising the firefox web driver,
                         make sure the executable web driver for firefox has been added to
@@ -52,8 +66,19 @@ class Updater:
         
         elif settings.get("pref_webdriver").lower() == "chrome":
             try:
-                print("[*] Launching Chrome")
-                self.driver = webdriver.Chrome()
+                # Checking if headless mode has been selected before initialising chrome web driver
+                if arg:
+                    print("[*] Launching Chrome in headless mode")
+
+                    # Setting web driver to run in headless mode using chrome Options() and passing it as an argument when initialising chrome web driver
+                    chrome_opts = chrome_options()
+                    chrome_opts.add_argument("--headless")
+
+                    self.driver = webdriver.Chrome(options=chrome_opts)
+                else:
+                    print("[*] Launching Chrome")
+                    self.driver = webdriver.Chrome()
+
             except:
                 print("""[X] Something went wrong with initialising the chrome web driver,
                         make sure the executable web driver for chrome has been added to
@@ -179,10 +204,14 @@ def main():
     # Validating settings before creating an Updater object
     validate_settings()
 
+    # Taking credentials
     noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password = read_creds()
 
+    # Taking command line arguments
+    args = take_args()
+
     # Creating noip_updater object
-    noip_updater = Updater("https://www.noip.com/", noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password)
+    noip_updater = Updater("https://www.noip.com/", noip_username, noip_password, twilio_sid, twilio_auth_token, gmail_username, gmail_password, args.headless)
 
     try:
         noip_updater.login()
@@ -224,12 +253,25 @@ def main():
     # Checking schedule
     check_schedule()
 
+# Takes command line arguments
+def take_args():
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("--headless", "--headless", help="Run web driver in headless mode", required=False, action="store_true")
+    args = argparser.parse_args()
+
+    return args
+
 # Runs checks if user has set a time interval in settings for the script to automatically run again and sleeps until next run time
 def check_schedule():
-    if settings.get("update_schedule") > 0:
-        while True:
-            time.sleep(int(settings.get("update_schedule")))
-            main()
+    try:
+        if int(settings.get("update_schedule")) > 0:
+            print("[*] Sleeping until next run to confirm hostnames")
+            while True:
+                # Converting days to seconds and sleeping until next run
+                time.sleep(int(settings.get("update_schedule")) * 86400)
+                main()
+    except ValueError:
+        pass
 
 # Uses the values from keys that are stored in the settings dict object to read environmental variables
 def read_creds():
