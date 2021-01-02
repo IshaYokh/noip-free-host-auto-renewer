@@ -4,15 +4,12 @@
 **THE SCRIPT WAS WRITTEN FOR EDUCATIONAL PURPOSES ONLY, THE AUTHOR DOES NOT HAVE ANY MALICIOUS INTENTIONS TOWARDS noip.com, USE AT YOUR OWN RISK. IF YOU DO NOT WANT TO CONFIRM YOUR HOSTNAMES MANUALLY, PLEASE GET THE PAID SUBSCRIPTION FROM noip.com**
 
 ## Description:
-
 noip.com provides up to 3 free hostnames, but each must be confirmed manually by logging in to the panel monthly. This tool automatically confirms the hostnames that you defined in the settings based on a time that you defined, typically, every 30 days.
 
 ## How it works:
-
 The tool uses selenium web drivers to automatically login to noip.com and confirm the hostnames and send a notification about hostnames that were successfully updated and those that were not updated due to an issue (notifications will be only sent if you choose so in the settings). All credentials, API keys, web driver preferred option, preferred notification method and other variables can be set in the settings (authentication details MUST NOT be stored in plain text, refer to Usage guide to find out how).
 
 ## Requirements:
-
 - Linux/Unix based system or Windows
 - Python3
 - Pip3 (Python package manager)
@@ -27,7 +24,6 @@ The tool uses selenium web drivers to automatically login to noip.com and confir
 - Twilio API key, authentication token, and a phone number (only required if SMS option is selected in settings)
 
 ## Usage guide:
-
 The script's functionality will completely depend on the correct values defined in settings. Settings is a dictionary object initialised in the config.py module, it holds keys as a setting option and the value as a setting value that you will set, for example, "hostnames" variable holds a list value that will contain a list of string hostnames separated by a comma, ["example1.com", "example2.com"] and based on that, the script will confirm each hostname defined in that list during execution. NOTE: authentication details WILL NOT be written in plain text in config.py module for security purposes. Instead, you must store the authentication details in environmental variables in your system and then use the variable name as a value, for example, you store your NoIP username in an environmental variable called NOIP_USERNAME, then the value for "noip_username" key stored in settings will be "NOIP_USERNAME" (pointing to the real username value). Google how to define environment variables for your operating system if you are not sure how. Below is an explanation of all keys and what values they must hold. The explanation is also provided in the config.py module to make it easier to refer to it while storing values in settings.
 
 **NOTE: The firefox or chrome web driver executable MUST be stored in PATH for the script to work properly (Google how to do that for your operating system if you are not sure how)**
@@ -35,7 +31,6 @@ The script's functionality will completely depend on the correct values defined 
 **NOTE: The script supports scheduling to autorun for next time based on the time provided in settings, but a more efficient way is to use a task scheduler program for Linux or windows and a couple of lines of bash scripting, in case you don't want the script to be running in a loop the whole time which is not efficient itself (in case you need to reboot your system). Set the value of "update_schedule" in settings to 0 if you use another task scheduling tool, such as the method mentioned earlier.**
 
 **Explanation of what each key is for:**
-
 - noip_username_env_var_id - this key must have the environmental variable name that was used to store the NoIP account username as a value
 - noip_password_env_var_id - this key must have the environmental variable name that was used to store the NoIP account password as a value        
 - hostnames - This key holds a list of hostnames that need to be confirmed on NoIP, the list should look like the following:
@@ -57,7 +52,6 @@ The script's functionality will completely depend on the correct values defined 
 - message_body - SMS or Email message body when a notification is sent
 
 ## Running the script:
-
 After fully configuring and providing all required values in settings, the script can be simply run with the below commands in the terminal or CMD:
 
 - Linux/Unix:
@@ -67,7 +61,6 @@ After fully configuring and providing all required values in settings, the scrip
     - python noip_updater.py
 
 ### Running with headless mode:
-
 To run the script with headless mode, simply add --headless argument from the terminal or CMD:
 
 - Linux/Unix:
