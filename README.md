@@ -1,5 +1,8 @@
 # noip-free-host-auto-renewer
 
+## DISCLAIMER:
+**THE SCRIPT WAS WRITTEN FOR EDUCATIONAL PURPOSES ONLY, THE AUTHOR DOES NOT HAVE ANY MALICIOUS INTENTIONS TOWARDS noip.com, USE AT YOUR OWN RISK. IF YOU DO NOT WANT TO CONFIRM YOUR HOSTNAMES MANUALLY, PLEASE GET THE PAID SUBSCRIPTION FROM noip.com**
+
 ## Description:
 
 noip.com provides up to 3 free hostnames, but each must be confirmed manually by logging in to the panel monthly. This tool automatically confirms the hostnames that you defined in the settings based on a time that you defined, typically, every 30 days.
