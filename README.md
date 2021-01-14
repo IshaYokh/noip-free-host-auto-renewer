@@ -1,5 +1,17 @@
 # noip-free-host-auto-renewer
 
+## Table of contents
+- [DISCLAIMER](#DISCLAIMER)
+- [Description](#Description)
+- [How it works](#How-it-works)
+- [Requirements](#Requirements)
+- [Usage guide](#Usage-guide)
+- [Running the script](#Running-the-script)
+- [Running with headless mode](#Running-with-headless-mode)
+- [LICENCE](#LICENCE)
+- [Author](#Author)
+
+
 ## DISCLAIMER:
 **THE SCRIPT WAS WRITTEN FOR EDUCATIONAL PURPOSES ONLY, THE AUTHOR DOES NOT HAVE ANY MALICIOUS INTENTIONS TOWARDS noip.com, USE AT YOUR OWN RISK. IF YOU DO NOT WANT TO CONFIRM YOUR HOSTNAMES MANUALLY, PLEASE GET THE PAID SUBSCRIPTION FROM noip.com**
 
