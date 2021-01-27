@@ -1,6 +1,6 @@
 # noip-free-host-auto-renewer
 
-## Table of contents
+## Table of contents:
 - [DISCLAIMER](#DISCLAIMER)
 - [Description](#Description)
 - [How it works](#How-it-works)
