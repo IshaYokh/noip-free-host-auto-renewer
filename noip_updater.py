@@ -59,7 +59,9 @@ class Updater:
             except:
                 print("""[X] Something went wrong with initialising the firefox web driver,
                         make sure the executable web driver for firefox has been added to
-                        PATH in your system
+                        PATH in your system and that the current firefox web driver supports
+                        the current version of firefox in your system e.g. download an older
+                        version of firefox web driver
                 """)
                 
                 sys.exit()
@@ -82,7 +84,9 @@ class Updater:
             except:
                 print("""[X] Something went wrong with initialising the chrome web driver,
                         make sure the executable web driver for chrome has been added to
-                        PATH in your system
+                        PATH in your system and that the current chrome web driver supports
+                        the current version of chrome in your system e.g. download an older
+                        version of chrome web driver
                 """)
 
                 sys.exit()
