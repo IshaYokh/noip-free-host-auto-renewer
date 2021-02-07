@@ -25,7 +25,7 @@ The tool uses selenium web drivers to automatically login to noip.com and confir
 - Linux/Unix based system or Windows
 - Python3
 - Pip3 (Python package manager)
-- All libraries in requirements.txt which are selenium V3.141.0 and Twilio V6.46.0 (can be installed through pip, command depends on your operating system, "pip3 install requirements.txt" for Linux)
+- All libraries in requirements.txt which are selenium V3.141.0 and Twilio V6.46.0 (can be installed through pip, command depends on your operating system, "pip3 install -r requirements.txt" for Linux)
 - Firefox or Chrome web driver executables (Must be compatible with your operating system)
     - URL for gecko webdriver (firefox): https://github.com/mozilla/geckodriver/releases
     - URL for chrome webdriver: https://chromedriver.chromium.org/downloads
